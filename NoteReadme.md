@@ -4,10 +4,6 @@ npx create-expo-app@latest --template default@sdk-54 ./
 npx create-expo-app@latest → Runs the latest Expo app generator without installing it globally
 --template default@sdk-54 → Uses the default Expo template with SDK version 54
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 93a1e9cd4b43e501900e1b677cb4b908f7c5ff12
 ### Clear project : npm run reset-project 
 
 ### Setup the NativeWind aka Tailwind 
@@ -90,3 +86,28 @@ const MyComponent = styled(OriginalComponent);
 
 Done. Your CSS speaks Tailwind now 😎
 - What it is use for : **Organization** 🤣
+
+
+
+
+## Importing new font to give feel it our app 
+
+- we use expo font add expo font plugin in /app.json under plugins 
+```
+[
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/PlusJakartaSans-Regular.ttf",
+            "./assets/fonts/PlusJakartaSans-Bold.ttf",
+            "./assets/fonts/PlusJakartaSans-Medium.ttf",
+            "./assets/fonts/PlusJakartaSans-SemiBold.ttf",
+            "./assets/fonts/PlusJakartaSans-ExtraBold.ttf",
+            "./assets/fonts/PlusJakartaSans-Light.ttf"
+          ]
+        }
+      ]
+```
+- yet we have told the to use these font but didn't loaded yet 
+- load the font see file main _layout.tsx
+- step 3 sync with tailwind css by : defining font in gloabal.css so that u can apply to your classes
