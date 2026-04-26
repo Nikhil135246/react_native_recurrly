@@ -36,7 +36,6 @@ It converts className="..." into real React Native styles behind the scenes.
 ### Route grops like : (auth) 
 - a folder thats group your screens
 - Wont be added to url aka path yeahh😅
-<<<<<<< HEAD
 - What it is use for : **Organization** 🤣
 
 
@@ -90,6 +89,4 @@ const MyComponent = styled(OriginalComponent);
 ```
 
 Done. Your CSS speaks Tailwind now 😎
-=======
 - What it is use for : **Organization** 🤣
->>>>>>> 93a1e9cd4b43e501900e1b677cb4b908f7c5ff12
