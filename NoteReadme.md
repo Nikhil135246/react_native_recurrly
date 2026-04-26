@@ -4,7 +4,10 @@ npx create-expo-app@latest --template default@sdk-54 ./
 npx create-expo-app@latest → Runs the latest Expo app generator without installing it globally
 --template default@sdk-54 → Uses the default Expo template with SDK version 54
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 93a1e9cd4b43e501900e1b677cb4b908f7c5ff12
 ### Clear project : npm run reset-project 
 
 ### Setup the NativeWind aka Tailwind 
@@ -33,6 +36,7 @@ It converts className="..." into real React Native styles behind the scenes.
 ### Route grops like : (auth) 
 - a folder thats group your screens
 - Wont be added to url aka path yeahh😅
+<<<<<<< HEAD
 - What it is use for : **Organization** 🤣
 
 
@@ -86,3 +90,6 @@ const MyComponent = styled(OriginalComponent);
 ```
 
 Done. Your CSS speaks Tailwind now 😎
+=======
+- What it is use for : **Organization** 🤣
+>>>>>>> 93a1e9cd4b43e501900e1b677cb4b908f7c5ff12

@@ -15,7 +15,10 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
+<<<<<<< HEAD
     "clsx": "^2.1.1",
+=======
+>>>>>>> 93a1e9cd4b43e501900e1b677cb4b908f7c5ff12
     "expo": "~54.0.33",
     "expo-constants": "~18.0.13",
     "expo-font": "~14.0.11",
@@ -49,8 +52,16 @@
     "tailwindcss": "^4.2.2",
     "typescript": "~5.9.2"
   },
+<<<<<<< HEAD
   "overrides": {
     "lightningcss": "1.30.1"
   },
+=======
+  
+  "overrides": {
+    "lightningcss": "1.30.1"
+  
+},
+>>>>>>> 93a1e9cd4b43e501900e1b677cb4b908f7c5ff12
   "private": true
 }
