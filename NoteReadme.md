@@ -111,3 +111,28 @@ Done. Your CSS speaks Tailwind now 😎
 - yet we have told the to use these font but didn't loaded yet 
 - load the font see file main _layout.tsx
 - step 3 sync with tailwind css by : defining font in gloabal.css so that u can apply to your classes
+
+- simply use font in classname " font-sans-bold"
+
+## Next chapter main ui development
+
+requirement lib:
+```
+npm install dayjs
+```
+
+required dummy data in our constants 
+- get data.ts and update from kit
+- get type.d.ts too for telling ts to interfaces
+
+
+Create 
+- Constant/ images.ts
+- root/lib/utils.ts content from kit : a simple currency formater 
+
+
+### implemented balance card
+
+### horizontal scrolling bar(Flatlist vs ScrollView u know man ) : upcomming section
+create 
+-  components/listheading.tsx , UpcomingSubscriptionCard.tsx

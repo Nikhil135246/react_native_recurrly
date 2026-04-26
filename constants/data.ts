@@ -8,7 +8,9 @@ export const tabs: AppTab[] = [
 ];
 
 export const HOME_USER = {
-    name: "Adrian | JS Mastery",
+    name: "Nikhil Kumar Kurrey",
+    firstname: "Nikhil",
+    lastname: "Kurrey",
 };
 
 export const HOME_BALANCE = {
