@@ -1,4 +1,5 @@
 import { Text } from 'react-native'
+import React from 'react'
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
 import {styled} from "nativewind";
@@ -6,7 +7,6 @@ import {styled} from "nativewind";
 
 // check readmenote for detial explanation about this issue : Why `className` didn't work on `SafeAreaView`
 const SafeAreaView = styled(RNSafeAreaView);
-import React from 'react'
 
 const insights = () => {
   return (

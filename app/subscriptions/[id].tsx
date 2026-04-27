@@ -1,16 +1,31 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { Link, useLocalSearchParams } from 'expo-router'
+import { useAuth } from "@clerk/expo";
+import React from "react";
+import { Link, Redirect, useLocalSearchParams } from "expo-router";
+import { Text, View } from "react-native";
 
 const SubscriptionsDetails = () => {
+    const { isLoaded, isSignedIn } = useAuth();
+    const { id } = useLocalSearchParams<{ id: string }>();
 
-    const {id} = useLocalSearchParams<{id:string}>();
+    if (!isLoaded) {
+      return null;
+    }
+
+    if (!isSignedIn) {
+      return <Redirect href="/(auth)/sign-in" />;
+    }
+
   return (
-    <View>
-      <Text>Subscriptions Details : {id}</Text>
-      <Link href="/">Back to Home</Link>
+    <View className="flex-1 bg-background p-5">
+      <View className="sub-card bg-card">
+        <Text className="list-title">Subscription details</Text>
+        <Text className="mt-4 text-base font-sans-medium text-primary">Subscription ID: {id}</Text>
+        <Link href="/(tabs)">
+          <Text className="mt-6 font-sans-bold text-accent">Back to home</Text>
+        </Link>
+      </View>
     </View>
-  )
-}
+  );
+};
 
 export default SubscriptionsDetails

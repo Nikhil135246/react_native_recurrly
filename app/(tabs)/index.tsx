@@ -2,11 +2,12 @@ import "@/global.css";
 import { StatusBar } from "expo-status-bar";
 import { FlatList, Image, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
+import { useUser } from "@clerk/expo";
 
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
-import { HOME_BALANCE, HOME_SUBSCRIPTIONS, HOME_USER, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
+import { HOME_BALANCE, HOME_SUBSCRIPTIONS, UPCOMING_SUBSCRIPTIONS } from "@/constants/data";
 import { icons } from "@/constants/icons";
 import images from "@/constants/images";
 import { formatCurrency } from "@/lib/utils";
@@ -19,6 +20,12 @@ import React, { useState } from "react";
 const SafeAreaView = styled(RNSafeAreaView);
 
 export default function App() {
+  const { user } = useUser();
+
+  const displayName =
+    [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
+    user?.primaryEmailAddress?.emailAddress ||
+    "Welcome";
 
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
   return (
@@ -29,9 +36,12 @@ export default function App() {
           <>
             <View className="home-header">
               <View className="home-user">
-                <Image source={images.profile} className="home-avatar" />
+                <Image
+                  source={user?.imageUrl ? { uri: user.imageUrl } : images.profile}
+                  className="home-avatar"
+                />
                 <Text className="home-user-name" numberOfLines={1} ellipsizeMode="tail">
-                  {HOME_USER.firstname} {HOME_USER.lastname}
+                  {displayName}
                 </Text>
               </View>
               <Image source={icons.plus2} className="home-add-icon" />
