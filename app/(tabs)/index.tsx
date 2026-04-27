@@ -20,7 +20,7 @@ const SafeAreaView = styled(RNSafeAreaView);
 
 export default function App() {
 
-  const [expandedSubriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
+  const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
   return (
     <SafeAreaView className="flex-1 bg-background p-5">
       <StatusBar style="dark" />
@@ -41,8 +41,10 @@ export default function App() {
               <Text className="home-balance-label">Balance</Text>
               <View className="home-balance-row">
                 <Text className="home-balance-amount"> {formatCurrency(HOME_BALANCE.amount)}</Text>
-                <Text className="home-balance-date">
-                  {dayjs(HOME_BALANCE.nextRenewalDate).format(" MMM-D")}
+                <Text className="home-balance-date pl-1">
+                  {HOME_BALANCE.nextRenewalDate
+                    ? dayjs(HOME_BALANCE.nextRenewalDate).format("MMM-D")
+                    : ""}
                 </Text>
               </View>
             </View>
@@ -58,7 +60,7 @@ export default function App() {
                 ListEmptyComponent={<Text className="home-empty-state">No upcoming subscriptions</Text>} />
 
             </View>
-        <ListHeading title="All Subscription" />
+        <ListHeading title="All Subscriptions" />
 
           </>
         )}
@@ -67,15 +69,15 @@ export default function App() {
         renderItem={({ item }) => (
           <SubscriptionCard
             {...item}
-            expanded={expandedSubriptionId === item.id}
+            expanded={expandedSubscriptionId === item.id}
             onPress={() => setExpandedSubscriptionId((currentId) => (currentId === item.id ? null : item.id))}
           />
         )}
-        extraData={expandedSubriptionId}
+        extraData={expandedSubscriptionId}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View className="h-4" />}
-        ListEmptyComponent={<Text className="home-empty-state">No  subscriptions yet.</Text>}
-        contentContainerClassName="pb-25"
+        ListEmptyComponent={<Text className="home-empty-state">No subscriptions yet.</Text>}
+        contentContainerClassName="pb-24"
       />
 
 
