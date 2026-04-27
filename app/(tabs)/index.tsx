@@ -1,8 +1,8 @@
 import "@/global.css";
+import { useUser } from "@clerk/expo";
 import { StatusBar } from "expo-status-bar";
 import { FlatList, Image, Text, View } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
-import { useUser } from "@clerk/expo";
 
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
