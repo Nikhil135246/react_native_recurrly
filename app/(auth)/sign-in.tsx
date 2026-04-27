@@ -131,7 +131,7 @@ const SignIn = () => {
       if (signIn.status === "complete") {
         await finalizeSession();
       } else if (signIn.status === "needs_client_trust") {
-        const emailCodeFactor = signIn.supportedSecondFactors.find(
+        const emailCodeFactor = signIn.supportedSecondFactors?.find(
           (factor) => factor.strategy === "email_code",
         );
 
