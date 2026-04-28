@@ -136,3 +136,13 @@ Create
 ### horizontal scrolling bar(Flatlist vs ScrollView u know man ) : upcomming section
 create 
 -  components/listheading.tsx , UpcomingSubscriptionCard.tsx
+
+
+## Auth Layer setup Clerk
+![](assets/Readme_Images/screenshot-ti5132tpm5p.png)
+
+- singup 
+- create new project
+- copy key 
+
+![](assets/Readme_Images/screenshot-ti17129tpm17p.png)
