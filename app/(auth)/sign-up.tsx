@@ -3,14 +3,14 @@ import { type Href, Link, useRouter } from "expo-router";
 import { styled } from "nativewind";
 import React, { useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TextInput,
-  View,
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TextInput,
+    View,
 } from "react-native";
 import { SafeAreaView as RNSafeAreaView } from "react-native-safe-area-context";
 
@@ -63,6 +63,7 @@ const SignUp = () => {
   const [code, setCode] = useState("");
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [localErrors, setLocalErrors] = useState<LocalErrors>({});
+  const [isSendingEmailCode, setIsSendingEmailCode] = useState(false);
 
   const isLoading = fetchStatus === "fetching";
   const requiresVerification =
@@ -151,9 +152,24 @@ const SignUp = () => {
         return;
       }
 
-      await signUp.verifications.sendEmailCode();
+      await handleSendEmailCode();
     } catch {
       setGlobalError("Something went wrong. Please try again.");
+    }
+  };
+
+  const handleSendEmailCode = async () => {
+    setGlobalError(null);
+    setIsSendingEmailCode(true);
+
+    try {
+      await signUp.verifications.sendEmailCode();
+    } catch (err) {
+      setGlobalError("Failed to send verification code. Please try again.");
+      // eslint-disable-next-line no-console
+      console.error("sendEmailCode error:", err);
+    } finally {
+      setIsSendingEmailCode(false);
     }
   };
 
@@ -250,10 +266,14 @@ const SignUp = () => {
 
                   <Pressable
                     className="auth-secondary-button"
-                    disabled={isLoading}
-                    onPress={() => signUp.verifications.sendEmailCode()}
+                    disabled={isSendingEmailCode || isLoading}
+                    onPress={handleSendEmailCode}
                   >
-                    <Text className="auth-secondary-button-text">Send a new code</Text>
+                    {isSendingEmailCode ? (
+                      <ActivityIndicator color="#081126" />
+                    ) : (
+                      <Text className="auth-secondary-button-text">Send a new code</Text>
+                    )}
                   </Pressable>
                 </View>
               ) : (

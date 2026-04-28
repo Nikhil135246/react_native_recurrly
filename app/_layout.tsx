@@ -1,10 +1,10 @@
 import '@/global.css';
-import { ClerkProvider } from "@clerk/expo";
+import { ClerkProvider, useAuth } from "@clerk/expo";
 import { tokenCache } from "@clerk/expo/token-cache";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,24 +24,49 @@ export default function RootLayout() {
       "Sans-Light": require("@/assets/fonts/PlusJakartaSans-Light.ttf"),
    });
 
-   useEffect(() => {
-      if (fontsLoaded || fontError) {
-         SplashScreen.hideAsync();
-      }
-   }, [fontsLoaded, fontError]);
+   // Mount ClerkProvider immediately so Clerk can initialize in parallel with fonts.
+   return (
+      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+         <InnerApp fontsLoaded={fontsLoaded} fontError={fontError} />
+      </ClerkProvider>
+   );
+}
 
-   if (!fontsLoaded && !fontError) {
+function InnerApp({ fontsLoaded, fontError }: { fontsLoaded: boolean; fontError: Error | null }) {
+   const { isLoaded: authLoaded } = useAuth();
+   const [readyToShow, setReadyToShow] = useState(false);
+
+   useEffect(() => {
+      let mounted = true;
+
+      const tryShow = async () => {
+         if ((fontsLoaded || !!fontError) && authLoaded && mounted) {
+            try {
+               await SplashScreen.hideAsync();
+            } catch (err) {
+               // ignore
+            }
+            if (mounted) setReadyToShow(true);
+         }
+      };
+
+      tryShow();
+
+      return () => {
+         mounted = false;
+      };
+   }, [fontsLoaded, fontError, authLoaded]);
+
+   if (!readyToShow) {
       return null;
    }
 
    return (
-      <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-         <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="onboarding" />
-            <Stack.Screen name="subscriptions/[id]" />
-         </Stack>
-      </ClerkProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+         <Stack.Screen name="(tabs)" />
+         <Stack.Screen name="(auth)" />
+         <Stack.Screen name="onboarding" />
+         <Stack.Screen name="subscriptions/[id]" />
+      </Stack>
    );
 }

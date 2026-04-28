@@ -1,7 +1,7 @@
 import { useSignIn } from "@clerk/expo";
 import { type Href, Link, useRouter } from "expo-router";
 import { styled } from "nativewind";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -58,14 +58,16 @@ const SignIn = () => {
   const [code, setCode] = useState("");
   const [globalError, setGlobalError] = useState<string | null>(null);
   const [localErrors, setLocalErrors] = useState<LocalErrors>({});
+  const [selectedFactor, setSelectedFactor] = useState<string | undefined>(undefined);
 
   const isLoading = fetchStatus === "fetching";
   const requiresVerification = signIn.status === "needs_client_trust";
+  const needsSecondFactor = signIn.status === "needs_second_factor";
 
   const validationErrors = useMemo(() => {
     const nextErrors: LocalErrors = {};
 
-    if (requiresVerification) {
+    if (requiresVerification || needsSecondFactor) {
       if (!code.trim()) {
         nextErrors.code = "Enter the verification code sent to your email.";
       } else if (!/^\d{6}$/.test(code.trim())) {
@@ -88,7 +90,13 @@ const SignIn = () => {
     }
 
     return nextErrors;
-  }, [code, emailAddress, password, requiresVerification]);
+  }, [code, emailAddress, password, requiresVerification, needsSecondFactor]);
+
+  useEffect(() => {
+    if (needsSecondFactor && !selectedFactor) {
+      setSelectedFactor(signIn.supportedSecondFactors?.[0]?.strategy);
+    }
+  }, [needsSecondFactor, signIn.supportedSecondFactors, selectedFactor]);
 
   const finalizeSession = async () => {
     await signIn.finalize({
@@ -140,6 +148,23 @@ const SignIn = () => {
         } else {
           setGlobalError("Email verification is currently unavailable for this account.");
         }
+      } else if (signIn.status === "needs_second_factor") {
+        const firstFactor = signIn.supportedSecondFactors?.[0];
+
+        if (!firstFactor) {
+          setGlobalError("Multi-factor authentication is required but no factors are available.");
+          return;
+        }
+
+        // default selected factor if not set
+        setSelectedFactor((prev) => prev ?? firstFactor.strategy);
+
+        // send a code for factors that need a code to be sent
+        if (firstFactor.strategy === "email_code") {
+          await signIn.mfa.sendEmailCode();
+        } else if (firstFactor.strategy === "phone_code") {
+          await signIn.mfa.sendPhoneCode();
+        }
       } else {
         setGlobalError("We need a little more information before signing you in.");
       }
@@ -157,7 +182,25 @@ const SignIn = () => {
     }
 
     try {
-      await signIn.mfa.verifyEmailCode({ code: code.trim() });
+      if (requiresVerification) {
+        await signIn.mfa.verifyEmailCode({ code: code.trim() });
+      } else if (needsSecondFactor) {
+        // route verification by selected factor
+        if (selectedFactor === "totp") {
+          // TOTP verification (time-based OTP)
+          // Clerk's SDK exposes verifyTotp
+          // @ts-ignore
+          await signIn.mfa.verifyTotp({ code: code.trim() });
+        } else if (selectedFactor === "phone_code") {
+          // verify phone code
+          // @ts-ignore
+          await signIn.mfa.verifyPhoneCode({ code: code.trim() });
+        } else if (selectedFactor === "email_code") {
+          await signIn.mfa.verifyEmailCode({ code: code.trim() });
+        } else {
+          throw new Error("Unsupported MFA factor");
+        }
+      }
 
       if (signIn.status === "complete") {
         await finalizeSession();
@@ -241,6 +284,91 @@ const SignIn = () => {
                     className="auth-secondary-button"
                     disabled={isLoading}
                     onPress={() => signIn.mfa.sendEmailCode()}
+                  >
+                    <Text className="auth-secondary-button-text">Send a new code</Text>
+                  </Pressable>
+
+                  <Pressable
+                    className="auth-secondary-button"
+                    disabled={isLoading}
+                    onPress={() => signIn.reset()}
+                  >
+                    <Text className="auth-secondary-button-text">Start over</Text>
+                  </Pressable>
+                </View>
+              ) : needsSecondFactor ? (
+                <View className="auth-form">
+                  <View className="mb-3">
+                    <Text className="auth-label">Choose verification method</Text>
+                    <View className="flex-row gap-2 mt-2">
+                      {signIn.supportedSecondFactors?.map((factor) => (
+                        <Pressable
+                          key={factor.strategy}
+                          className={`px-3 py-2 rounded border ${
+                            selectedFactor === factor.strategy ? "border-accent" : "border-gray-200"
+                          }`}
+                          onPress={() => setSelectedFactor(factor.strategy)}
+                        >
+                          <Text>
+                            {factor.strategy === "totp"
+                              ? "Authenticator app"
+                              : factor.strategy === "phone_code"
+                              ? "SMS"
+                              : factor.strategy === "email_code"
+                              ? "Email"
+                              : factor.strategy}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View className="auth-field">
+                    <Text className="auth-label">Verification code</Text>
+                    <TextInput
+                      className={`auth-input ${
+                        localErrors.code || getClerkFieldError(errors, "code") ? "auth-input-error" : ""
+                      }`}
+                      value={code}
+                      placeholder="Enter 6-digit code"
+                      placeholderTextColor="rgba(0,0,0,0.5)"
+                      onChangeText={(value) => {
+                        setCode(value);
+                        if (localErrors.code) {
+                          setLocalErrors((prev) => ({ ...prev, code: undefined }));
+                        }
+                      }}
+                      keyboardType="numeric"
+                      maxLength={6}
+                    />
+                    {(localErrors.code || getClerkFieldError(errors, "code")) && (
+                      <Text className="auth-error">{localErrors.code || getClerkFieldError(errors, "code")}</Text>
+                    )}
+                  </View>
+
+                  <Pressable
+                    className={`auth-button ${primaryDisabled ? "auth-button-disabled" : ""}`}
+                    disabled={primaryDisabled}
+                    onPress={handleVerify}
+                  >
+                    {isLoading ? (
+                      <ActivityIndicator color="#081126" />
+                    ) : (
+                      <Text className="auth-button-text">Verify and continue</Text>
+                    )}
+                  </Pressable>
+
+                  <Pressable
+                    className="auth-secondary-button"
+                    disabled={isLoading}
+                    onPress={() => {
+                      if (selectedFactor === "phone_code") {
+                        // @ts-ignore
+                        signIn.mfa.sendPhoneCode();
+                      } else if (selectedFactor === "email_code") {
+                        signIn.mfa.sendEmailCode();
+                      }
+                    }}
                   >
                     <Text className="auth-secondary-button-text">Send a new code</Text>
                   </Pressable>
