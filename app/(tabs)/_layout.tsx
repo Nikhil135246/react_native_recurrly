@@ -16,7 +16,7 @@ const TabLayout = () => {
     }
 
     if (!isSignedIn) {
-        return <Redirect href="/(auth)/sign-in" />
+        return <Redirect href="/sign-in" />
     }
 
     const TabIcon = ({ focused, icon }: TabIconProps) => {
