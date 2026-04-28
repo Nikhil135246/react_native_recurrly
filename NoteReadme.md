@@ -146,3 +146,7 @@ create
 - copy key 
 
 ![](assets/Readme_Images/screenshot-ti17129tpm17p.png)
+
+
+# Posthog setup 
+- npx -y @posthog/wizard@latest

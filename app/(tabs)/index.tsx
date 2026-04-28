@@ -14,6 +14,7 @@ import { formatCurrency } from "@/lib/utils";
 import dayjs from "dayjs";
 import { styled } from "nativewind";
 import React, { useState } from "react";
+import { usePostHog } from "posthog-react-native";
 // reason to do that , SAV is from react-native-safe-area-context and it doesn't support className prop, so we need to wrap it with styled from nativewind to use className prop on it.
 
 // check readmenote for detial explanation about this issue : Why `className` didn't work on `SafeAreaView`
@@ -28,6 +29,7 @@ export default function App() {
     "Welcome";
 
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
+  const posthog = usePostHog();
   return (
     <SafeAreaView className="flex-1 bg-background p-5">
       <StatusBar style="dark" />
@@ -80,7 +82,19 @@ export default function App() {
           <SubscriptionCard
             {...item}
             expanded={expandedSubscriptionId === item.id}
-            onPress={() => setExpandedSubscriptionId((currentId) => (currentId === item.id ? null : item.id))}
+            onPress={() => {
+              setExpandedSubscriptionId((currentId) => {
+                const next = currentId === item.id ? null : item.id;
+                try {
+                  if (next) {
+                    posthog?.capture?.("subscription_expanded", { subscriptionId: item.id });
+                  } else {
+                    posthog?.capture?.("subscription_collapsed", { subscriptionId: item.id });
+                  }
+                } catch {}
+                return next;
+              });
+            }}
           />
         )}
         extraData={expandedSubscriptionId}

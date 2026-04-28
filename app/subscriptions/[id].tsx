@@ -1,4 +1,6 @@
 import { useAuth } from "@clerk/expo";
+import { usePostHog } from "posthog-react-native";
+import { useEffect } from "react";
 import { Link, Redirect, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { Text, View } from "react-native";
@@ -6,6 +8,16 @@ import { Text, View } from "react-native";
 const SubscriptionsDetails = () => {
     const { isLoaded, isSignedIn } = useAuth();
     const { id } = useLocalSearchParams<{ id: string }>();
+
+    const posthog = usePostHog();
+
+    useEffect(() => {
+      if (isLoaded && isSignedIn && id) {
+        try {
+          posthog?.capture?.("subscription_details_viewed", { subscriptionId: id });
+        } catch {}
+      }
+    }, [isLoaded, isSignedIn, id]);
 
     if (!isLoaded) {
       return null;

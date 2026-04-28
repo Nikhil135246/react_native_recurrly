@@ -1,4 +1,5 @@
 import { useClerk, useUser } from "@clerk/expo";
+import { usePostHog } from "posthog-react-native";
 import { styled } from "nativewind";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
@@ -11,6 +12,7 @@ const SafeAreaView = styled(RNSafeAreaView);
 const Settings = () => {
   const { user } = useUser();
   const { signOut } = useClerk();
+  const posthog = usePostHog();
 
   return (
     <SafeAreaView className="flex-1 bg-background p-5">
@@ -20,7 +22,15 @@ const Settings = () => {
           Signed in as {user?.primaryEmailAddress?.emailAddress ?? "your account"}
         </Text>
 
-        <Pressable className="sub-cancel mt-6" onPress={() => signOut()}>
+        <Pressable
+          className="sub-cancel mt-6"
+          onPress={() => {
+            try {
+              posthog?.capture?.("user_signed_out");
+            } catch {}
+            signOut();
+          }}
+        >
           <Text className="sub-cancel-text">Sign out</Text>
         </Pressable>
       </View>

@@ -2,6 +2,7 @@ import { useSignIn } from "@clerk/expo";
 import { type Href, Link, useRouter } from "expo-router";
 import { styled } from "nativewind";
 import React, { useEffect, useMemo, useState } from "react";
+import { usePostHog } from "posthog-react-native";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -52,6 +53,7 @@ const getClerkGlobalError = (errors: unknown): string | undefined => {
 const SignIn = () => {
   const { signIn, errors, fetchStatus } = useSignIn();
   const router = useRouter();
+  const posthog = usePostHog();
 
   const [emailAddress, setEmailAddress] = useState("");
   const [password, setPassword] = useState("");
@@ -133,10 +135,16 @@ const SignIn = () => {
 
       if (error) {
         setGlobalError("We could not sign you in. Please review your details and try again.");
+        try {
+          posthog?.capture?.("user_sign_in_failed", { message: getClerkGlobalError(error) ?? "password_error" });
+        } catch {}
         return;
       }
 
       if (signIn.status === "complete") {
+        try {
+          posthog?.capture?.("user_signed_in");
+        } catch {}
         await finalizeSession();
       } else if (signIn.status === "needs_client_trust") {
         const emailCodeFactor = signIn.supportedSecondFactors?.find(
@@ -203,6 +211,9 @@ const SignIn = () => {
       }
 
       if (signIn.status === "complete") {
+        try {
+          posthog?.capture?.("user_signed_in");
+        } catch {}
         await finalizeSession();
         return;
       }

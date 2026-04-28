@@ -2,6 +2,7 @@ import { useSignUp } from "@clerk/expo";
 import { type Href, Link, useRouter } from "expo-router";
 import { styled } from "nativewind";
 import React, { useMemo, useState } from "react";
+import { usePostHog } from "posthog-react-native";
 import {
     ActivityIndicator,
     KeyboardAvoidingView,
@@ -55,6 +56,7 @@ const getClerkGlobalError = (errors: unknown): string | undefined => {
 const SignUp = () => {
   const { signUp, errors, fetchStatus } = useSignUp();
   const router = useRouter();
+  const posthog = usePostHog();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -149,6 +151,9 @@ const SignUp = () => {
 
       if (error) {
         setGlobalError("We could not create your account. Please review your details.");
+        try {
+          posthog?.capture?.("user_sign_up_failed", { message: getClerkGlobalError(error) ?? "signup_error" });
+        } catch {}
         return;
       }
 
@@ -185,6 +190,9 @@ const SignUp = () => {
       await signUp.verifications.verifyEmailCode({ code: code.trim() });
 
       if (signUp.status === "complete") {
+        try {
+          posthog?.capture?.("user_signed_up");
+        } catch {}
         await finalizeSession();
         return;
       }
